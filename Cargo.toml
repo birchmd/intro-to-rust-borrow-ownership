@@ -1,0 +1,7 @@
+[package]
+name = "borrowing-and-ownership"
+version = "0.1.0"
+authors = ["Michael Birch <birchmd8@gmail.com>"]
+edition = "2021"
+
+[dependencies]
