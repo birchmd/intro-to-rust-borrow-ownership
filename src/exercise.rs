@@ -14,7 +14,18 @@ where
     M: Fn(&T) -> U + Send + Sync,
     R: Fn(U, U) -> U + Send + Sync,
 {
-    data.iter().map(map_fn).fold(init, reduce)
+    //data.iter().map(map_fn).fold(init, reduce)
+    let chunk_size = data.len() / 2;
+    let process_chunk =
+        |input: &[T], init: U| -> U { input.iter().map(&map_fn).fold(init, &reduce) };
+    std::thread::scope(|s| {
+        let init_copy = init.clone();
+        let handle_1 = s.spawn(|| process_chunk(&data[0..chunk_size], init_copy));
+        let handle_2 = s.spawn(|| process_chunk(&data[chunk_size..], init));
+        let result_1 = handle_1.join().unwrap();
+        let result_2 = handle_2.join().unwrap();
+        reduce(result_1, result_2)
+    })
 }
 
 #[test]
